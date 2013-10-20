@@ -122,7 +122,7 @@ _KAC_get_current_base_command()
     while [ $I -le $COMP_CWORD ]
     do
         # command words are all lower-case
-        echo ${COMP_WORDS[$I]} | grep -E "^[a-z]*$" > /dev/null || break
+        echo ${COMP_WORDS[$I]} | grep -E "^[a-z]+$" > /dev/null || break
         CURRENT="$PREVIOUS ${COMP_WORDS[$I]}"
         cat $_KCA_CACHE_PATH | grep -E "^$CURRENT" > /dev/null || break
         PREVIOUS=$CURRENT
@@ -169,7 +169,7 @@ _knife()
     for ITEM in $RAW_LIST
     do
         # always relevant if only lower-case chars : continuation of the base command
-        echo $ITEM | grep -E "^[a-z]*$" > /dev/null && LIST="$LIST $ITEM" && continue
+        echo $ITEM | grep -E "^[a-z]+$" > /dev/null && LIST="$LIST $ITEM" && continue
         case $ITEM in
             *COOKBOOK*)
                 # special case for cookbooks : from site or local
