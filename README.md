@@ -5,7 +5,7 @@ Known to work on both Mac OS X and Ubuntu.
 
 Queries `knife`'s help for the available commands.
 
-Offers completions on nodes', cookbooks', users', clients', data bags', environments' and roles' names. 
+Additionally offers completions on nodes', cookbooks', users', clients', data bags', environments' and roles' names.
 
 Caches the data locally for performance.
 
