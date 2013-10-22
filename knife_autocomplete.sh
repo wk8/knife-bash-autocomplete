@@ -183,6 +183,11 @@ _knife()
                 local DATA_BAG_NAME=${COMP_WORDS[$(( COMP_CWORD-1 ))]}
                 REGEN_CMD="knife data bag show $DATA_BAG_NAME"
                 ;;
+            *INDEX*)
+                # see doc @ http://docs.opscode.com/knife_search.html
+                LIST="$LIST client environment node role"
+                REGEN_CMD="knife data bag list"
+                ;;
             *BAG*) REGEN_CMD="knife data bag list";;
             *CLIENT*) REGEN_CMD="knife client list";;
             *NODE*) REGEN_CMD="knife node list";;
