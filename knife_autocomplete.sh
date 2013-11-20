@@ -64,16 +64,16 @@ _KAC_get_command_from_cache_name()
 
 # given a command as argument, it fetches the cache for that command if it can find it
 # otherwise it waits for the cache to be generated
-# in either case, it regenerates the cache, and sets the _KCA_CACHE_PATH env variable
+# in either case, it regenerates the cache, and sets the _KAC_CACHE_PATH env variable
 # for obvious reason, do NOT call that in a sub-shell (in particular, no piping)
 _KAC_get_and_regen_cache()
 {
     # the cache name can't have space in it
     local CACHE_NAME=$(_KAC_get_cache_name_from_command "$@")
     local REGEN_CMD="_KAC_regen_cache $CACHE_NAME $@"
-    _KCA_CACHE_PATH="$_KNIFE_AUTOCOMPLETE_CACHE_DIR/$CACHE_NAME"
+    _KAC_CACHE_PATH="$_KNIFE_AUTOCOMPLETE_CACHE_DIR/$CACHE_NAME"
     # no need to wait for the regen if the file already exists
-    [ -f $_KCA_CACHE_PATH ] && ($REGEN_CMD &) || $REGEN_CMD
+    [ -f $_KAC_CACHE_PATH ] && ($REGEN_CMD &) || $REGEN_CMD
 }
 
 # performs two things: first, deletes all obsolete temp files
@@ -84,7 +84,7 @@ _KAC_clean_cache()
     # delete all obsolete temp files, could be lingering there for any kind of crash in the caching process
     for FILE in $(ls $_KAC_CACHE_TMP_DIR)
     do
-        _KAC_is_file_newer_than $FILE $_KNIFE_AUTOCOMPLETE_MAX_CACHE_AGE || rm $FILE
+        _KAC_is_file_newer_than $FILE $_KNIFE_AUTOCOMPLETE_MAX_CACHE_AGE || rm -f $FILE
     done
     # refresh really stale caches
     for FILE in $(find $_KNIFE_AUTOCOMPLETE_CACHE_DIR -maxdepth 1 -type f -not -name '.*')
@@ -111,9 +111,9 @@ _KAC_knife_commands()
     knife --help | grep -E "^knife" | sed -E 's/ \(options\)//g'
 }
 
-# rebuilds the knife base command currently being completed, and assigns it to $_KCA_CURRENT_COMMAND
+# rebuilds the knife base command currently being completed, and assigns it to $_KAC_CURRENT_COMMAND
 # additionnally, returns 1 iff the current base command is not complete, 0 otherwise
-# also sets $_KCA_CURRENT_COMMAND_NB_WORDS if the base command is complete
+# also sets $_KAC_CURRENT_COMMAND_NB_WORDS if the base command is complete
 _KAC_get_current_base_command()
 {
     local PREVIOUS="knife"
@@ -124,12 +124,12 @@ _KAC_get_current_base_command()
         # command words are all lower-case
         echo ${COMP_WORDS[$I]} | grep -E "^[a-z]+$" > /dev/null || break
         CURRENT="$PREVIOUS ${COMP_WORDS[$I]}"
-        cat $_KCA_CACHE_PATH | grep -E "^$CURRENT" > /dev/null || break
+        cat $_KAC_CACHE_PATH | grep -E "^$CURRENT" > /dev/null || break
         PREVIOUS=$CURRENT
         I=$(( $I + 1))
     done
-    _KCA_CURRENT_COMMAND=$PREVIOUS
-    [ $I -le $COMP_CWORD ] && _KCA_CURRENT_COMMAND_NB_WORDS=$I
+    _KAC_CURRENT_COMMAND=$PREVIOUS
+    [ $I -le $COMP_CWORD ] && _KAC_CURRENT_COMMAND_NB_WORDS=$I
 }
 
 # searches the position of the currently completed argument in the current base command
@@ -137,8 +137,8 @@ _KAC_get_current_base_command()
 # assumes the current base command is complete
 _KAC_get_current_arg_position()
 {
-    local CURRENT_ARG_POS=$(( $_KCA_CURRENT_COMMAND_NB_WORDS + 1 ))
-    local COMPLETE_COMMAND=$(cat $_KCA_CACHE_PATH | grep -E "^$_KCA_CURRENT_COMMAND")
+    local CURRENT_ARG_POS=$(( $_KAC_CURRENT_COMMAND_NB_WORDS + 1 ))
+    local COMPLETE_COMMAND=$(cat $_KAC_CACHE_PATH | grep -E "^$_KAC_CURRENT_COMMAND")
     local CURRENT_ARG
     while [ $CURRENT_ARG_POS -le $COMP_CWORD ]
     do
@@ -158,7 +158,7 @@ _knife()
     COMREPLY=()
     # get correct command & arg pos
     _KAC_get_current_base_command && ARG_POSITION=$(_KAC_get_current_arg_position) || ARG_POSITION=$(( $COMP_CWORD + 1 ))
-    RAW_LIST=$(cat $_KCA_CACHE_PATH | grep -E "^$_KCA_CURRENT_COMMAND" | cut -d ' ' -f $ARG_POSITION | uniq)
+    RAW_LIST=$(cat $_KAC_CACHE_PATH | grep -E "^$_KAC_CURRENT_COMMAND" | cut -d ' ' -f $ARG_POSITION | uniq)
 
     # we need to process that raw list a bit, most notably for placeholders
     # NOTE: I chose to explicitely fetch & cache _certain_ informations for the server (cookbooks & node names, etc)
@@ -175,7 +175,7 @@ _knife()
                 # special case for cookbooks : from site or local
                 [[ ${COMP_WORDS[2]} == 'site' ]] && REGEN_CMD="knife cookbook site list" || REGEN_CMD="knife cookbook list"
                 _KAC_get_and_regen_cache $REGEN_CMD
-                LIST="$LIST $(cat $_KCA_CACHE_PATH | cut -d ' ' -f 1)"
+                LIST="$LIST $(cat $_KAC_CACHE_PATH | cut -d ' ' -f 1)"
                 continue
                 ;;
             *ITEM*)
@@ -198,7 +198,7 @@ _knife()
             *) continue;;
         esac
         _KAC_get_and_regen_cache $REGEN_CMD
-        LIST="$LIST $(cat $_KCA_CACHE_PATH)"
+        LIST="$LIST $(cat $_KAC_CACHE_PATH)"
     done
     COMPREPLY=( $(compgen -W "${LIST}" -- ${COMP_WORDS[COMP_CWORD]}))
 }
