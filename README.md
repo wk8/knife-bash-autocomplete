@@ -9,4 +9,6 @@ Additionally offers completions on nodes', cookbooks', users', clients', data ba
 
 Caches the data locally for performance.
 
+Simply source this repo's only file somewhere in your bash profile.
+
 Please open a Github issue if you find a bug (or even better, a pull request!)
